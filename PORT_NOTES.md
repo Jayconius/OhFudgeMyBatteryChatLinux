@@ -58,13 +58,15 @@ lose them:
   browser already degrades gracefully if the named font isn't installed.
 - **`tools/fake_vr_signal_simulator.py`**: same font-resolver pattern,
   duplicated locally (not imported from `app.gui`) to keep the Simulator
-  lightweight. Also imports `STEAMVR_SERVICE_SERIAL` from `app.device_ids`,
-  not `app.vr_monitor` - **do not change this import.** Importing
-  `app.vr_monitor` pulls in `import openvr`, and the Simulator's PyInstaller
-  build doesn't bundle OpenVR's native libs (only the main app's spec does
-  `collect_all('openvr')`) - this crashed the compiled Simulator on
-  first try. `app/device_ids.py` exists specifically to hold this one
-  constant with zero heavy dependencies, safe for both binaries to import.
+  lightweight - this part IS Linux-port-specific. Its
+  `from app.device_ids import STEAMVR_SERVICE_SERIAL` import (not
+  `app.vr_monitor`) is **not** a Linux-only fix, though - `app/device_ids.py`
+  already exists in the Windows repo too, fixing the exact same "Simulator
+  exe crashes because importing vr_monitor pulls in openvr, which the
+  Simulator's PyInstaller spec never bundles" bug that was caught there
+  first, during the original v1.2.1 SteamVR Service work. Do not change this
+  import - just don't list `device_ids.py` as Linux-only when syncing (see
+  correction below).
 - **`app/i18n.py`**: `"tlh"` (Klingon) removed from the `LANGUAGES` dict.
   The `STRINGS` dict still has every `"tlh"` translation - left in as inert
   data, not stripped, since `piqad.py`'s font-loading is Windows-only and
@@ -74,7 +76,13 @@ lose them:
 
 ## Linux-only additions (don't exist in the Windows repo at all)
 
-- `app/device_ids.py` - see above.
+**Correction (2026-09-15): `app/device_ids.py` was wrongly listed here
+originally - it already exists in the Windows repo** (added there first,
+during the v1.2.1 SteamVR Service feature work, for the same reason
+described above). It's part of the shared code, not a Linux-specific
+patch - don't skip it or treat it as something to remove/replace when
+syncing from Windows.
+
 - `.github/workflows/build.yml` - builds on `ubuntu-22.04`, smoke-tests both
   binaries under Xvfb (launches them, confirms still running after 5s, not
   just that they compiled), packages two AppImages + one combined tarball,
