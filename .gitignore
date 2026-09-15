@@ -12,3 +12,7 @@ __pycache__/
 
 # Editors
 .vscode/
+
+# Private session-continuity notes for an AI assistant - not for the repo
+# (PORT_NOTES.md is the public/committed equivalent - keep them distinct)
+HANDOFF.md
